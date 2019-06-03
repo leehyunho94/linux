@@ -17,7 +17,7 @@ struct msgbuf {
 
 void print_usage(const char *progname)
 {
-    printf("%s (send|recv)\n", progname);
+    printf("%s (send|recv) mtype\n", progname);
 }
 
 static int init_msgq(void) {
@@ -41,7 +41,7 @@ static int init_msgq(void) {
     return 0;
 }
 
-static int do_send(void)
+static int do_send(long mtype)
 {
     int msgq;
     struct msgbuf mbuf;
@@ -52,9 +52,10 @@ static int do_send(void)
         return -1;
     }
    
-    memset(&mbuf, 0, sizeof(struct msgbuf));
-    mbuf.mtype = 1; // 메세지를 보낼 때 mtype은 반드시 양수로 설정해야 한다 
-    strncpy(mbuf.string, "hello world", sizeof(mbuf.string) - 1);
+    memset(&mbuf, 0, sizeof(mbuf));
+    mbuf.mtype = mtype; // 메세지를 보낼 때 mtype은 반드시 양수로 설정해야 한다 
+    snprintf(mbuf.string, sizeof(mbuf.string),
+           "hello world mtype %ld", mtype); 
     if(msgsnd(msgq, &mbuf, sizeof(mbuf.string), 0) == -1) {
         // 보낼 때와 받을 때의 사이즈는 string에만 맞춰주면 된다. mtype은 제외
         // 마지막 flag는IPC_NOWAIT로 메세지 큐가 생기지 않았다면 바로 에러를 출력하게 된다
@@ -65,7 +66,7 @@ static int do_send(void)
     return 0;
 }
 
-static int do_recv(void)
+static int do_recv(long mtype)
 {
     int ret, msgq;
     struct msgbuf mbuf;
@@ -76,8 +77,9 @@ static int do_recv(void)
         return -1;
     }
    
-    memset(&mbuf, 0, sizeof(struct msgbuf));
-    ret = msgrcv(msgq, &mbuf, sizeof(mbuf.string), 1, 0);
+    memset(&mbuf, 0, sizeof(mbuf));
+    // 현재는 원하는 mtype을 넣어준다
+    ret = msgrcv(msgq, &mbuf, sizeof(mbuf.string), mtype, 0);
     if(ret == -1) {
         perror("msgrcv()\n");
         return -1;
@@ -90,18 +92,27 @@ static int do_recv(void)
 
 int main(int argc, char **argv) 
 {
-    if(argc < 2) {
+    long mtype;
+
+    if(argc < 3) {
         print_usage(argv[0]);
         return -1;
     }
     
+    // 10진수로 치환
+    mtype = strtol(argv[2], NULL, 10);
+
     if(!strcmp(argv[1], "send")) {
-        if(do_send() == -1) {
+        if(mtype <= 0) {
+            print_usage(argv[0]);
+            return -1;
+        }
+        if(do_send(mtype) == -1) {
             perror("send()\n");
             return -1;
         }
     } else if(!strcmp(argv[1], "recv")) {
-        if(do_recv() == -1) {
+        if(do_recv(mtype) == -1) {
             perror("recv()\n");
             return -1;
         }
