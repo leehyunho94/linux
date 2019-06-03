@@ -1,0 +1,1 @@
+# Linux implementation includes a directory for each running process, including kernel processes, in directories named /proc/PID, where PID is the process number.
