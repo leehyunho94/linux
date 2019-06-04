@@ -7,10 +7,8 @@
 
 void *child_thread_main(void *arg)
 {
-    printf("Before exec\n");
+    printf("Before exec()\n");
     execl("/bin/ls", "-al", NULL);
-    printf("After exec\n");
-
     return NULL;
 }
 
@@ -32,6 +30,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    printf("After exec()\n");
     printf("Done..\n");
     return 0;
 }
