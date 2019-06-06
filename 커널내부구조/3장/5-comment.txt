@@ -1,1 +1,17 @@
-출처: https://palpit.tistory.com/622
+# 5-getscheduler.c
+
+사용자가 기본으로 생성하는 태스크의 스케줄링 정책을 출력하는 예제
+기본 태스크는 realtime이 없는 스케줄링을 따른다
+
+# 5-fifo-rr.c
+
+위에서 다뤘던 예제를 그대로 가져와, 일반 스케줄링을 실시간 스케줄링으로 바꿔주는 예제다.
+스케줄링 변경은 int sched_setscheduler(pid_t pid, int policy,
+                               const struct sched_param *param) 함수를 사용하며
+(pid, 스케줄링 정책, 우선순위 번호가 담긴 param struct 주소)
+
+# 5-deadline.c
+
+sched_setscheduler man page를 읽어보면, 실시간 스케줄링에서 SCHED_DEADLINE은 지원하지 않는다. 따라서 찾아보니 sched_setscheduler의 원함수인 sched_setattr을 써야만 했다. API가 존재하지만 잘 모르는 어떠한 이유로 syscall로 불러야만 해서 복잡했다
+
+https://stackoverflow.com/questions/50082317/is-sched-deadline-officially-supported-in-ubuntu-16-0://stackoverflow.com/questions/50082317/is-sched-deadline-officially-supported-in-ubuntu-16-04

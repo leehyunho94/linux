@@ -17,15 +17,6 @@ int main(int argc, char **argv)
 {
     pid_t pid;
     int policy;
-    
-    /*
-    if(argc < 2) {
-        pid = 0;
-    }
-    else {
-        pid = atoi(argv[1]);
-    }
-    */
 
     pid = getpid();
     printf("Scheduler Policy for PID: %d -> ", pid);
